@@ -11,10 +11,10 @@ Interactive bivariate web map of musical theatres in Manhattan, New York City ca
 * **Broadway Route:** A shapefile of Broadway is overlayed on the map for spatial reference.
 
 ### Data Collection ###
-* **Theatre Locations:** From *Theatre Pizzazz*.
-* **NYC Districts:** From *NYC DCP Mapping Portal*.
-* **Broadway Shapefile:** From *NYC DCP Mapping Portal*.
-* **Search Bar:** From *MokahalA on Github*.
+* **Theatre Locations:** From [*Theatre Pizzazz*.](https://theaterpizzazz.com/maps-broadway-off-broadway-theaters/)
+* **NYC Districts:** From [*NYC DCP Mapping Portal*.](https://hub.arcgis.com/datasets/DCP::nyc-community-districts/about)
+* **Broadway Shapefile:** From [*NYC DCP Mapping Portal*.](https://data.cityofnewyork.us/City-Government/Digital-City-Map-Shapefile/m2vu-mgzw)
+* **Search Bar:** From [*MokahalA on Github*.](https://github.com/MokahalA/Leaflet.PinSearch/tree/main)
 
 
 
