@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Theatres in Manhattan</title>
+    	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.0/dist/leaflet.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Limelight">
+    
+    <!-- Leaflet.PinSearch CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.pinsearch/src/Leaflet.PinSearch.css" crossorigin="">
+
+    <style>
+
+h1 {
+            position: absolute;
+            margin-top: 0;
+            top: 10px;
+            left: 45px;
+            font-size: 30px;
+            font-family: 'Limelight', serif;
+            letter-spacing: .04em;
+            padding: 10px 15px;
+            background: #f7f7f6;
+            border: 1px solid rgb(128, 128, 128);
+            border-radius: 3px;
+            z-index: 800;
+        }
+
+ 	html, body, #map { width: 100%; height: 100%; margin: 0; background: #fff; }
+    .legend {
+    line-height: 40px;
+    font-size: 16px;
+    width: 200px;
+    color: #333333;
+    padding: 6px 8px;
+    background: white;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    font-family: 'Titillium Web', sans-serif;
+}
+ 
+
+.legend i {
+    width: 20px;
+    height: 20px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.9;
+}
+ 
+.legend img {
+    width: 16px;
+    height: 16px;
+    margin-right: 3px;
+    float: left;
+}
+ 
+.legend p {
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0;
+
+
+}
+
+.legend .broadway-line {
+    width: 20px;
+    height: 3px;
+    background: #3c0945;
+    float: left;
+    margin-right: 8px;
+    margin-top: 9px;
+}
+
+    </style>
+    	<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+	<script src="https://unpkg.com/leaflet@1.7.0/dist/leaflet.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script>
+  
+    <!-- Leaflet.PinSearch JavaScript -->
+    <script src="https://unpkg.com/leaflet.pinsearch/src/Leaflet.PinSearch.js" crossorigin=""></script>
+
+</head>
+
+<h1>THEATRES IN MANHATTAN</h1>
+
+
+<body>
+<!-- Our web map and content will go here -->
+<div id="map"></div>
+<script>
+
+ 
+// 1. Create a map object.
+var mymap = L.map('map', {
+    center: [40.7727081783819, -73.97176231662014], //note that we've centered the map to downtown AVL
+    zoom: 12, //this line adjusts the starting zoom level of the map
+    maxZoom: 25,//this line sets the maximum zoom level
+    minZoom: 1,//this line sets the minimum zoom level
+    detectRetina: true // detect whether the screen is high resolution or not.
+});
+
+
+ 
+// 2. Add a base map.
+Stadia_AlidadeSmooth = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 20,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+}).addTo(mymap);
+
+// 3. Add Airbnb GeoJSON Data
+// Null variable that will hold Airbnb data
+var threatres = null;
+// add several extra spaces here.
+//steps 4, 5, etc. will be inserted in this line location.
+// 4. build up a set of colors from colorbrewer's dark2 category
+var colors = chroma.scale('Dark2').mode('lch').colors(4);
+
+// 5. dynamically append style classes to this page. The style classes will be used to shade the markers.
+// We can use a for loop to do this.
+for (i = 0; i < 4; i++) {
+    $('head').append($("<style> .marker-color-" + (i + 1).toString() + " { color: " + colors[i] + "; font-size: 15px; text-shadow: 0 0 3px #ffffff;} </style>"));
+}
+// Get GeoJSON and put it on the map when it loads
+// Make sure you have the correct directory path below
+// You can see we're also adding attribution information for our data sources
+// We will also add lines of code around this airbnb_listings object as we adjust the style of the symbols
+//Make sure and change your authorname in the attribute information
+// Get GeoJSON and put it on the map when it loads
+// Make sure you have the correct directory path below
+// You can see we're also adding attribution information for our data sources
+
+
+theatres = L.geoJson.ajax("assets/theatres.geojson",{
+ 
+  // assign a function to the onEachFeature parameter of the airbnb_listings object.
+  // Then each (point) feature will have a popup window.
+  // The content of the popup window is the value of `property_t` from the attribute table
+  onEachFeature: function (feature, layer) {
+      layer.bindPopup(feature.properties.theatre);
+  },
+ 
+   pointToLayer: function(feature, latlng) {
+      var id = 0;
+      if (feature.properties.category == "Broadway Theatre") { id = 0; }
+      else if (feature.properties.category == "Off-Broadway, Commercial")  { id = 1; }
+      else if (feature.properties.category == "Off-Broadway, Non-Profit") { id = 2; }
+      else { id = 3; }
+      return L.marker(latlng, {title: feature.properties.theatre, icon: L.divIcon({className: 'fas fa-theater-masks marker-color-' + (id + 1).toString() })});
+  },
+    attribution: 'Theatre Data &copy; Theater Pizzazz | NYC Community Districts and Broadway Route &copy; NYC DCP Mapping Portal | Base Map &copy; CartoDB | Search Bar &copy; Ahmad El Mokahal | Author: Aidan Workman'
+}).addTo(mymap);
+
+// Add Leaflet.PinSearch search bar
+theatres.on('data:loaded', function() {
+    var searchBar = L.control.pinSearch({
+        position: 'topleft',
+        placeholder: 'Search for a theatre (Ex. Gershwin Theatre)',
+        buttonText: 'Search',
+        searchBarWidth: '265px',
+        searchBarHeight: '35px',
+        maxSearchResults: 5,
+        focusOnMarker: false,
+        onSearch: function(query) {
+            theatres.eachLayer(function(layer) {
+                if (layer instanceof L.Marker && layer.options.title === query) {
+                    mymap.setView(layer.getLatLng(), 17);
+                    layer.openPopup();
+                }
+            });
+        }
+    }).addTo(mymap);
+});
+
+
+
+// 6. Set function for color ramp
+colors = chroma.scale('Purples').colors(4); //we'll use 5 classes of purples
+ 
+// this function manually defines your choropleth classification system
+//so you'll need to figure out what break points you'd like to use
+//based on the data distribution
+//this equal interval classification with 5 classes, takes the range of the
+//data (133) and divides it by 5, to show there are intervals of 27 per class
+//so...
+function setColor(density) {
+    var id = 0;
+    if (density > 13) { id = 3; }
+    else if (density > 2) { id = 2; }
+    else if (density > 0) { id = 1; }
+    else  { id = 0; }
+    return colors[id];
+}
+
+// 7. Set style function that sets fill color property equal to total Airbnbs
+function style(feature) {
+    return {
+        fillColor: setColor(feature.properties.total_theatres),
+        fillOpacity: .6,
+        weight: 2,
+        opacity: 1,
+        color: '#b4b4b4',
+        dashArray: '4'
+    };
+}
+
+
+// 8. Add county polygons
+L.geoJson.ajax("assets/nyc_districts.geojson", {
+    style: style
+}).addTo(mymap);
+
+// 9. Create Leaflet Control Object for Legend
+var legend = L.control({position: 'topright'});
+ 
+
+
+ 
+// 10. Function that runs when legend is added to map
+legend.onAdd = function () {
+ 
+    // Create Div Element and Populate it with HTML
+    var div = L.DomUtil.create('div', 'legend');
+    //this line creates a title for the choropleth part of the legend
+    div.innerHTML += '<b>Theatres per District</b><br />';
+    //notice the class breaks entered at the end of the next 5 lines
+    //the colors specify the shade of purple that we used to do the polygon shading
+    div.innerHTML += '<i style="background: ' + colors[3] + '; opacity: 0.5"></i><p> 46</p>';
+    div.innerHTML += '<i style="background: ' + colors[2] + '; opacity: 0.5"></i><p>3-13</p>';
+    div.innerHTML += '<i style="background: ' + colors[1] + '; opacity: 0.5"></i><p>1-2</p>';
+    div.innerHTML += '<i style="background: ' + colors[0] + '; opacity: 0.5"></i><p> 0</p>';
+    //this line provides the legend title for the airbnb colored symbols
+    div.innerHTML += '<hr><b>Theatre Type<b><br />';
+    //the next 3 lines call the airbnb icon along with its proper color
+    //notice the names of the Airbnb property types listed within the <p> tags at the end of the lines
+    div.innerHTML += '<i class="fa-solid fa-masks-theater marker-color-1"></i><p>Broadway Theatres</p>';
+    div.innerHTML += '<i class="fa-solid fa-masks-theater marker-color-2"></i><p>Off-Broadway - Commercial</p>';
+    div.innerHTML += '<i class="fa-solid fa-masks-theater marker-color-3"></i><p>Off-Broadway - Non-Profit</p>';
+    div.innerHTML += '<hr><div class="broadway-line"></div><p>Broadway</p>';
+
+    // Return the Legend div containing the HTML content
+    return div;
+};
+legend.addTo(mymap);
+L.control.scale({position: 'bottomleft'}).addTo(mymap);
+
+broadway = L.geoJson.ajax("assets/broadway.geojson", {
+    style: {
+        color: "#3c0945", 
+        weight: 3, 
+        opacity: .9,
+    }
+});
+
+
+broadway.addTo(mymap);
+
+</script>
+</body>
+</html>
